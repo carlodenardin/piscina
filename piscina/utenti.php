@@ -1,19 +1,9 @@
 <?php
+
 include 'config/config.php';
 
 $alert = "";
 $messaggio = "";
-
-if ($result = mysqli_query($connessione, "SELECT codice FROM dati")) {
-
-    /* determine number of rows result set */
-    $row = mysqli_num_rows($result);
-
-    if($row!=0){
-      $sql = "DELETE FROM dati";
-      $connessione->query($sql);
-    }
-}
 
 if(isset($_POST['aggiungi_utente'])){
   $nome = $_POST['nome'];
@@ -38,20 +28,25 @@ $sql = "SELECT * FROM bagnanti ORDER BY cognome"; //VERIFICATA
 $var = $connessione->query($sql);
 $result="";
 while($obj = $var->fetch_object()){
-  $result.="<tr data-nome='".$obj->nome."' data-cognome='".$obj->cognome."' data-data='".$obj->data."' data-email='".$obj->email."' data-cell='".$obj->cell."'><td>".$obj->nome."</td>";
-  $result.="<td>".$obj->cognome."</td>";
-  $result.="<td>".$obj->data."</td>";
+  $data = $obj->data;
+  $data = explode("-",$data);
+  $data = $data[2]."/".$data[1]."/".$data[0];
+
+  $result.="<form method='post' action='profilo.php'><tr><td>".$obj->cognome."</td>";
+  $result.="<td>".$obj->nome."</td>";
+  $result.="<td>".$data."</td>";
 
   $sql = "SELECT * FROM card WHERE fk_bagnante='".$obj->id_bagnante."'";
   $risultato = $connessione->query($sql);
   $row = mysqli_num_rows($risultato);
 
   if($row!=0){
-    $result.="<td><button type='button' class='btn btn-success'>ATTIVA</button></td></tr>";
+    $result.="<td><button type='button' class='btn btn-success'>ATTIVA</button></td>";
   }
   else{
-    $result.="<td><button type='button' class='btn btn-danger'>NON ATTIVA</button></td></tr>";;
+    $result.="<td><button type='button' class='btn btn-danger'>NON ATTIVA</button></td>";;
   }
+  $result.="<td><button type='sumbit' class='btn btn-info' value='".$obj->id_bagnante."' name='id' >PROFILO</button></td></tr></form>";
 }
 
 
@@ -70,6 +65,8 @@ while($obj = $var->fetch_object()){
     <script href="js/jquery-1.8.3.min"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     <script>
+
+      // FUNZIONE PER FILTRARE COGNOMI
       function myFunction() { 
         var input, filter, table, tr, td, i;input = document.getElementById("myInput");
         filter = input.value.toUpperCase();
@@ -87,56 +84,6 @@ while($obj = $var->fetch_object()){
           } 
         }
       }
-
-      $(function () {
-        $('#viewProfilo').modal({
-            keyboard: true,
-            backdrop: "static",
-            show: false,
-
-          }).on('show', function () {
-
-        });
-
-        $(".table-striped").find('tr[data-nome]').on('click', function () {
-            debugger;
-
-            //do all your operation populate the modal and open the modal now. DOnt need to use show event of modal again
-            $('#nomeProfilo').html($("<div class='col-md-4'><li class='list-group-item'><strong>Nome:</strong></li></div><div class='col-md-8'><li class='list-group-item'> "  + $(this).data('nome') +"</li></div>"));
-            $('#viewProfilo').modal('show');
-        });
-
-        $(".table-striped").find('tr[data-cognome]').on('click', function () {
-            debugger;
-
-            //do all your operation populate the modal and open the modal now. DOnt need to use show event of modal again
-            $('#cognomeProfilo').html($("<div class='col-md-4'><li class='list-group-item'><strong>Cognome:</strong></li></div><div class='col-md-8'><li class='list-group-item'> "  + $(this).data('cognome') +"</li></div>"));
-            $('#viewProfilo').modal('show'); 
-        });
-
-        $(".table-striped").find('tr[data-data]').on('click', function () {
-            debugger;
-            //do all your operation populate the modal and open the modal now. DOnt need to use show event of modal again
-            $('#dataProfilo').html($("<div class='col-md-4'><li class='list-group-item'><strong>Data di nascita:</strong></li></div><div class='col-md-8'><li class='list-group-item'> "  + $(this).data('data') +"</li></div>"));
-            $('#viewProfilo').modal('show'); 
-        });
-
-        $(".table-striped").find('tr[data-email]').on('click', function () {
-            debugger;
-
-            //do all your operation populate the modal and open the modal now. DOnt need to use show event of modal again
-            $('#emailProfilo').html($("<div class='col-md-4'><li class='list-group-item'><strong>Email:</strong></li></div><div class='col-md-8'><li class='list-group-item'> "  + $(this).data('email') +"</li></div>"));
-            $('#viewProfilo').modal('show'); 
-        });
-
-        $(".table-striped").find('tr[data-cell]').on('click', function () {
-            debugger;
-
-            //do all your operation populate the modal and open the modal now. DOnt need to use show event of modal again
-            $('#cellProfilo').html($("<div class='col-md-4'><li class='list-group-item'><strong>Cellulare:</strong></li></div><div class='col-md-8'><li class='list-group-item'> "  + $(this).data('cell') + "</li></div>"));
-            $('#viewProfilo').modal('show'); 
-        });
-      });
 
     </script>
   </head>
@@ -208,32 +155,28 @@ while($obj = $var->fetch_object()){
                 </div>
                 <div class="row">
                       <div class="col-md-12">
-                          <input class="form-control" type="text" id="myInput" onkeyup="myFunction()" placeholder="Filtra utenti per nome...">
+                          <input class="form-control" type="text" id="myInput" onkeyup="myFunction()" placeholder="Filtra utenti per cognome...">
                       </div>
                 </div>
                 <br>
                 <table class="table table-striped" id="myTable">
-                      <tr>
-                        <th>Nome</th>
-                        <th>Cognome</th>
-                        <th>Data</th>
-                        <th>Card</th>
-                      </tr>
-                      <?php echo $result; ?>
+                  <tr>
+                    <th>Cognome</th>
+                    <th>Nome</th>
+                    <th>Data</th>
+                    <th>Card</th>
+                    <th>Profilo</th>
+                  </tr>
+                  <?php echo $result; ?>
                 </table>
               </div>
-              </div>
-
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    
-
-    <!-- Modals -->
-
-    <!-- addUtente -->
+    <!-- FORM AGGIUNGI UTENTE id=addUtente -->
     <div class="modal fade" id="addUtente" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -272,36 +215,6 @@ while($obj = $var->fetch_object()){
         </div>
       </div>
     </div>
-
-    
-
-    <!-- viewProfilo -->
-    <div class="modal fade" id="viewProfilo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
-              <h3>Profilo</h3>
-            </div>
-            <div class="modal-body">
-              <ul class="list-group">
-                <div id="nomeProfilo"></div>
-                <div id="cognomeProfilo"></div>
-                <div id="dataProfilo"></div>
-                <div id="emailProfilo"></div>
-                <div id="cellProfilo"></div>
-              </ul>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> 
-            </div>
-        </div>
-      </div>
-    </div>
-
-  <script>
-     CKEDITOR.replace( 'editor1' );
- </script>
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
