@@ -1,5 +1,9 @@
 <?php
+session_start();
 include 'config/config.php';
+if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
+  header("Refresh:0; url=logout.php");
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,7 +33,7 @@ include 'config/config.php';
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#">Welcome, admin</a></li>
-            <li><a href="login.html">Logout</a></li>
+            <li><a href="logout.php">Logout</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -69,7 +73,6 @@ include 'config/config.php';
                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Dashboard
               </a>
               <a href="utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti <span class="badge"></span></a>
-              <a href="card.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Card <span class="badge">12</span></a>
             </div>
           </div>
           <div class="col-md-9">

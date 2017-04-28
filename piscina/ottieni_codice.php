@@ -10,6 +10,7 @@ $row = $risultato->fetch_array();
 
 $_SESSION['card'] = $row['codice'];
 
+
 echo "<input type='text' class='form-control' name='card' value='".$row['codice']."' disabled>";
 
 $connessione->close();

@@ -9,9 +9,8 @@ if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
 $alert = "";
 $messaggio = "";
 
-$id = $_GET['id'];
-//passo il valore ad attivita.php
-$_SESSION['id_passato']=$id;
+//ricevo il valore da profilo.php
+$id = $_SESSION['id_passato'];
 
 $sql = "SELECT * FROM bagnanti WHERE id_bagnante='$id'";//VERIFICATA
 $risultato = $connessione->query($sql);
@@ -19,25 +18,17 @@ $row = $risultato->fetch_array();
 
 $nome = $row['nome'];
 $cognome = $row['cognome'];
-$data = $row['data'];
-$email = $row['email'];
-$cell = $row['cell'];
 
-if(isset($_GET['salva'])){
-  $id = $_GET['id'];
-  $nome = $_GET['nome'];
-  $cognome = $_GET['cognome'];
-  $data = $_GET['data'];
-  $email = $_GET['email'];
-  $cell = $_GET['cell'];
-  $sql = "UPDATE bagnanti SET nome='".$nome."',cognome='".$cognome."',data='".$data."',email='".$email."',cell='".$cell."' WHERE id_bagnante='$id'";
+if(isset($_POST['bottone'])){
+  $sql = "DELETE FROM card WHERE fk_bagnante='$id'";//VERIFICATA
   if($connessione->query($sql)){
     $alert = "alert alert-success";
-    $messaggio = "Utente modificato";
+    $messaggio = "Carta eliminata";
+    header("Refresh:1; url=card.php");
   }
   else{
     $alert = "alert alert-danger";
-    $messaggio = "Utente <strong>NON</strong> modificato";
+    $messaggio = "Carta <strong>NON</strong> eliminata";
   }
 }
 
@@ -53,6 +44,34 @@ if(isset($_GET['salva'])){
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <script src="http://cdn.ckeditor.com/4.6.1/standard/ckeditor.js"></script>
+    <script href="js/jquery-1.8.3.min"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+
+    <script>
+      //OTTIENI CODICE DA DATABASE
+      (function($)
+      {
+          $(document).ready(function()
+          {
+              $.ajaxSetup(
+              {
+                  cache: false,
+                  beforeSend: function() {
+                      $('#content').hide();
+                      $('#content').show();
+                  }
+                  
+              });
+              var $container = $("#content");
+              $container.load("ottieni_codice.php");
+              var refreshId = setInterval(function()
+              {
+                  $container.load('ottieni_codice.php');
+              },2000);
+          });
+      })(jQuery);
+    </script>
+
   </head>
   <body>
 
@@ -113,7 +132,7 @@ if(isset($_GET['salva'])){
                   <div class="col-md-12">
                     <div class="panel panel-default">
                       <div class="panel-body">
-                        <a href="utenti.php">Utenti</a> / <a href="#"><?php echo $nome." ".$cognome ?></a>
+                        <a href="utenti.php">Utenti</a> / <a href="profilo.php?id=<?php echo $id?>"><?php echo $nome." ".$cognome ?></a> / <a href="card.php?id=<?php echo $id?>">Card</a> / <a href="#">Rimuovi Card</a>
                       </div>
                     </div>
                   </div>
@@ -124,56 +143,26 @@ if(isset($_GET['salva'])){
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-md-8">
-                    <form class="form-horizontal" method="get" action="profilo.php?id=<?php echo $id?>">
-                      <input type="hidden" value="<?php echo $id;?>" name="id">
-                      <div class="form-group">
-                        <label class="col-lg-3 control-label">Nome:</label>
-                        <div class="col-lg-8">
-                          <input class="form-control" value="<?php echo $nome;?>" type="text" name="nome">
-                        </div>
+                  <div class="col-md-1"></div>
+                  <div class="col-md-10">
+                    <div class="panel panel-default">
+                      <div class="panel-body"><center>Sicuro di rimuovere la carta associata all'utente <strong><?php echo $nome." ".$cognome ?></strong>? </center>
                       </div>
-                      <div class="form-group">
-                        <label class="col-lg-3 control-label">Cognome:</label>
-                        <div class="col-lg-8">
-                          <input class="form-control" value="<?php echo $cognome;?>" type="text" name="cognome">
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-lg-3 control-label">Data di nascita:</label>
-                        <div class="col-lg-8">
-                          <input class="form-control" value="<?php echo $data;?>" type="date" name="data">
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-lg-3 control-label">Email:</label>
-                        <div class="col-lg-8">
-                          <input class="form-control" value="<?php echo $email;?>" type="email" name="email">
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-md-3 control-label">Cellulare:</label>
-                        <div class="col-md-8">
-                          <input class="form-control" value="<?php echo $cell;?>" type="number" name="cell">
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-md-3 control-label"></label>
-                        <div class="col-md-8">
-                          <input class="btn btn-info" value="Salva" type="submit" name="salva">
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="col-md-12">
-                      <ul class="list-group">
-                        <li class="list-group-item"><a href="attivita.php"><button style="width: 100%;" type="button" class="btn btn-info">Attività</button></a></li>
-                        <li class=  "list-group-item"><a href="card.php"><button style="width: 100%;" type="button" class="btn btn-info">Card</button></a></li>
-                      </ul>
+                    </div>
+
+                    <div class="panel panel-danger">
+                        <div class="panel-heading"><h5><center>AZIONE NON REVERSIBILE</center></h5></div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                      <form action="remove_card.php" method="post"><button style="width: 100%;" type="submit" class="btn btn-success" name="bottone">SI</button></form>
+                    </div>
+                    <div class="col-md-6">
+                      <a href="card.php"><button style="width: 100%;" type="button" value="no" class="btn btn-danger" name="bottone">NO</button></a>
                     </div>
                   </div>
-                </div>
+                  <div class="col-md-1"></div>
+                </div>     
               </div>
             </div>
           </div>
@@ -186,7 +175,5 @@ if(isset($_GET['salva'])){
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
-    <script href="js/jquery-1.8.3.min"></script>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
   </body>
 </html>

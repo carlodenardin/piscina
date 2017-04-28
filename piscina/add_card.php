@@ -8,10 +8,12 @@ if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
 
 $alert = "";
 $messaggio = "";
+$card = "";
+//ricevo il valore da profilo.php
+$id = $_SESSION['id_passato'];
 
-$id = $_GET['id'];
-//passo il valore ad attivita.php
-$_SESSION['id_passato']=$id;
+//ricevo il valore da ottieni_codice.php
+
 
 $sql = "SELECT * FROM bagnanti WHERE id_bagnante='$id'";//VERIFICATA
 $risultato = $connessione->query($sql);
@@ -19,25 +21,29 @@ $row = $risultato->fetch_array();
 
 $nome = $row['nome'];
 $cognome = $row['cognome'];
-$data = $row['data'];
-$email = $row['email'];
-$cell = $row['cell'];
 
-if(isset($_GET['salva'])){
-  $id = $_GET['id'];
-  $nome = $_GET['nome'];
-  $cognome = $_GET['cognome'];
-  $data = $_GET['data'];
-  $email = $_GET['email'];
-  $cell = $_GET['cell'];
-  $sql = "UPDATE bagnanti SET nome='".$nome."',cognome='".$cognome."',data='".$data."',email='".$email."',cell='".$cell."' WHERE id_bagnante='$id'";
+if ($result = mysqli_query($connessione, "SELECT codice FROM dati")) {
+    /* determine number of rows result set */
+    $row = mysqli_num_rows($result);
+    if($row!=0){
+      $sql = "DELETE FROM dati";
+      $connessione->query($sql);
+    }
+}
+
+if(isset($_POST['add_card'])){
+  $card = $_SESSION['card'];
+  $entrate = $_POST['entrate'];
+  $tipo = $_POST['tipo'];
+  $sql = "INSERT INTO card (id_card,tipo,entrate,fk_bagnante) VALUES ('$card', '$tipo','$entrate', '$id')"; //VERIFICATA
   if($connessione->query($sql)){
     $alert = "alert alert-success";
-    $messaggio = "Utente modificato";
+    $messaggio = "Carta configurata";
+    header("Refresh:1; url=card.php");
   }
   else{
     $alert = "alert alert-danger";
-    $messaggio = "Utente <strong>NON</strong> modificato";
+    $messaggio = "Carta <strong>NON</strong> configurata";
   }
 }
 
@@ -53,6 +59,34 @@ if(isset($_GET['salva'])){
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <script src="http://cdn.ckeditor.com/4.6.1/standard/ckeditor.js"></script>
+    <script href="js/jquery-1.8.3.min"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+
+    <script>
+      //OTTIENI CODICE DA DATABASE
+      (function($)
+      {
+          $(document).ready(function()
+          {
+              $.ajaxSetup(
+              {
+                  cache: false,
+                  beforeSend: function() {
+                      $('#content').hide();
+                      $('#content').show();
+                  }
+                  
+              });
+              var $container = $("#content");
+              $container.load("ottieni_codice.php");
+              var refreshId = setInterval(function()
+              {
+                  $container.load('ottieni_codice.php');
+              },2000);
+          });
+      })(jQuery);
+    </script>
+
   </head>
   <body>
 
@@ -109,11 +143,12 @@ if(isset($_GET['salva'])){
                 <h3 class="panel-title"><?php echo $nome." ".$cognome ?></h3>
               </div>
               <div class="panel-body">
+
                 <div class="row">
                   <div class="col-md-12">
                     <div class="panel panel-default">
                       <div class="panel-body">
-                        <a href="utenti.php">Utenti</a> / <a href="#"><?php echo $nome." ".$cognome ?></a>
+                        <a href="utenti.php">Utenti</a> / <a href="profilo.php?id=<?php echo $id?>"><?php echo $nome." ".$cognome ?></a> / <a href="card.php?id=<?php echo $id?>">Card</a> / <a href="#">Aggiungi Card</a>
                       </div>
                     </div>
                   </div>
@@ -124,56 +159,37 @@ if(isset($_GET['salva'])){
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-md-8">
-                    <form class="form-horizontal" method="get" action="profilo.php?id=<?php echo $id?>">
-                      <input type="hidden" value="<?php echo $id;?>" name="id">
-                      <div class="form-group">
-                        <label class="col-lg-3 control-label">Nome:</label>
-                        <div class="col-lg-8">
-                          <input class="form-control" value="<?php echo $nome;?>" type="text" name="nome">
+                  <div class="col-md-12">
+                    <form action="add_card.php" method="post">
+                      <div class="row">
+                        <div class="col-md-4">
+                          <label>Card</label>
+                          <div id="content"></div>
                         </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-lg-3 control-label">Cognome:</label>
-                        <div class="col-lg-8">
-                          <input class="form-control" value="<?php echo $cognome;?>" type="text" name="cognome">
+                        <div class="col-md-4">
+                          <label>Tipo</label>
+                          <input class="form-control" type="text" name="tipo">
                         </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-lg-3 control-label">Data di nascita:</label>
-                        <div class="col-lg-8">
-                          <input class="form-control" value="<?php echo $data;?>" type="date" name="data">
+                        <div class="col-md-4">
+                          <label>Nr entrate</label>
+                          <select class="form-control" name="entrate">
+                            <option value="" disabled selected>Aggiungi Entrate</option>
+                            <option value="10">+10</option>
+                            <option value="20">+20</option>
+                            <option value="50">+50</option>
+                          </select>
                         </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-lg-3 control-label">Email:</label>
-                        <div class="col-lg-8">
-                          <input class="form-control" value="<?php echo $email;?>" type="email" name="email">
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-md-3 control-label">Cellulare:</label>
+                        
                         <div class="col-md-8">
-                          <input class="form-control" value="<?php echo $cell;?>" type="number" name="cell">
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label class="col-md-3 control-label"></label>
-                        <div class="col-md-8">
-                          <input class="btn btn-info" value="Salva" type="submit" name="salva">
-                        </div>
+                          <br>
+                          <button type="submit" class="btn btn-info" name="add_card">Aggiungi Card</button>
+                        </div> 
+                        
                       </div>
                     </form>
                   </div>
-                  <div class="col-md-4">
-                    <div class="col-md-12">
-                      <ul class="list-group">
-                        <li class="list-group-item"><a href="attivita.php"><button style="width: 100%;" type="button" class="btn btn-info">Attività</button></a></li>
-                        <li class=  "list-group-item"><a href="card.php"><button style="width: 100%;" type="button" class="btn btn-info">Card</button></a></li>
-                      </ul>
-                    </div>
-                  </div>
                 </div>
+                
               </div>
             </div>
           </div>
@@ -186,7 +202,5 @@ if(isset($_GET['salva'])){
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
-    <script href="js/jquery-1.8.3.min"></script>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
   </body>
 </html>

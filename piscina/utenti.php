@@ -1,6 +1,10 @@
 <?php
-
+session_start();
 include 'config/config.php';
+
+if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
+  header("Refresh:0; url=logout.php");
+}
 
 $alert = "";
 $messaggio = "";
@@ -32,7 +36,7 @@ while($obj = $var->fetch_object()){
   $data = explode("-",$data);
   $data = $data[2]."/".$data[1]."/".$data[0];
 
-  $result.="<form method='post' action='profilo.php'><tr><td>".$obj->cognome."</td>";
+  $result.="<form method='get' action='profilo.php'><tr><td>".$obj->cognome."</td>";
   $result.="<td>".$obj->nome."</td>";
   $result.="<td>".$data."</td>";
 
@@ -103,7 +107,7 @@ while($obj = $var->fetch_object()){
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#">Welcome, admin</a></li>
-            <li><a href="login.html">Logout</a></li>
+            <li><a href="logout.php">Logout</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -131,7 +135,6 @@ while($obj = $var->fetch_object()){
                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Dashboard
               </a>
               <a href="utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti </a>
-              <a href="card.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Card </a>
             </div>
 
           </div>

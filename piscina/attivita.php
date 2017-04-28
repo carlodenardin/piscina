@@ -2,11 +2,16 @@
 session_start();
 include 'config/config.php';
 
+if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
+  header("Refresh:0; url=logout.php");
+}
+
 $alert = "";
 $messaggio = "";
 
 //ricevo il valore da profilo.php
 $id = $_SESSION['id_passato'];
+$_SESSION['id_passato']=$id;
 
 $sql = "SELECT * FROM bagnanti WHERE id_bagnante='$id'";//VERIFICATA
 $risultato = $connessione->query($sql);
@@ -25,7 +30,7 @@ while($obj = $risultato2->fetch_object()){
   $data = date_format($date, 'd-m-Y H:i:s');
   $data = str_replace("-", "/", $data);
 
-  $stampa.="<tr><td>".$obj->nome."</td>";
+  $stampa.="<tr><td>".$obj->tipo."</td>";
   $stampa.="<td>".$data."</td></tr>";
 }
 
@@ -79,7 +84,7 @@ while($obj = $risultato2->fetch_object()){
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#">Welcome, admin</a></li>
-            <li><a href="login.html">Logout</a></li>
+            <li><a href="logout.php">Logout</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -107,7 +112,6 @@ while($obj = $risultato2->fetch_object()){
                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Dashboard
               </a>
               <a href="utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti </a>
-              <a href="card.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Card </a>
             </div>
 
           </div>
@@ -122,7 +126,7 @@ while($obj = $risultato2->fetch_object()){
                   <div class="col-md-12">
                     <div class="panel panel-default">
                       <div class="panel-body">
-                        <a href="utenti.php">Utenti</a> / <a href="#"><?php echo $nome." ".$cognome ?></a> <a href="#"></a>
+                        <a href="utenti.php">Utenti</a> / <a href="profilo.php?id=<?php echo $id?>"><?php echo $nome." ".$cognome ?></a> / <a href="#">Attività</a>
                       </div>
                     </div>
                   </div>
