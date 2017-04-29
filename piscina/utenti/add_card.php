@@ -1,44 +1,51 @@
 <?php
 session_start();
-include 'config/config.php';
+include '../config/config.php';
+
+if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
+  header("Refresh:0; url=../logout.php");
+}
+
+$alert = "";
+$messaggio = "";
+$card = "";
+//ricevo il valore da profilo.php
+$id = $_SESSION['id_passato'];
+
+//ricevo il valore da ottieni_codice.php
+
+
+$sql = "SELECT * FROM bagnanti WHERE id_bagnante='$id'";//VERIFICATA
+$risultato = $connessione->query($sql);
+$row = $risultato->fetch_array();
+
+$nome = $row['nome'];
+$cognome = $row['cognome'];
 
 if ($result = mysqli_query($connessione, "SELECT codice FROM dati")) {
-
     /* determine number of rows result set */
     $row = mysqli_num_rows($result);
-
     if($row!=0){
       $sql = "DELETE FROM dati";
       $connessione->query($sql);
     }
 }
 
-$alert = "";
-$messaggio = "";
-
-if(isset($_POST['modifica_card'])){
-    $card = $_SESSION['card'];
-    $entrate = $_POST['entrate'];
-
-    $sql = "SELECT * FROM bagnanti JOIN card ON id_bagnante=fk_bagnante WHERE id_card='$card'"; //VERIFICATA
-    $risultato = $connessione->query($sql);
-    $row = mysqli_num_rows($risultato);
-    if($row!=0){
-      $sql = "UPDATE card SET entrate=entrate+'$entrate' WHERE id_card='$card'"; //VERIFICATA
-      if($connessione->query($sql)){
-        $alert = "alert alert-success";
-        $messaggio = "Entrate aggiunte ".$entrate;
-      }
-      else{
-        $alert = "alert alert-danger";
-        $messaggio = "Entrate <strong>NON</strong> aggiunte ".$entrate;
-      }
-    }
-    else{
-      $alert = "alert alert-danger";
-      $messaggio = "La carta non è collegata con nessun utente";
-    }
-} 
+if(isset($_POST['add_card'])){
+  $card = $_SESSION['card'];
+  $entrate = $_POST['entrate'];
+  $tipo = $_POST['tipo'];
+  $sql = "INSERT INTO card (id_card,tipo,entrate,fk_bagnante) VALUES ('$card', '$tipo','$entrate', '$id')"; //VERIFICATA
+  if($connessione->query($sql)){
+    $alert = "alert alert-success";
+    $messaggio = "Carta configurata";
+    header("Refresh:1; url=card.php");
+  }
+  else{
+    $alert = "alert alert-danger";
+    $messaggio = "Carta <strong>NON</strong> configurata";
+  }
+}
 
 ?>
 <!DOCTYPE html>
@@ -49,10 +56,10 @@ if(isset($_POST['modifica_card'])){
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Area | Pages</title>
     <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/style.css" rel="stylesheet">
     <script src="http://cdn.ckeditor.com/4.6.1/standard/ckeditor.js"></script>
-    <script href="js/jquery-1.8.3.min"></script>
+    <script href="../bootstrap/js/jquery-1.8.3.min"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
 
     <script>
@@ -97,7 +104,7 @@ if(isset($_POST['modifica_card'])){
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#">Welcome, admin</a></li>
-            <li><a href="login.html">Logout</a></li>
+            <li><a href="../logout.php">Logout</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -107,72 +114,62 @@ if(isset($_POST['modifica_card'])){
       <div class="container">
         <div class="row">
           <div class="col-md-10">
-            <h1><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Card</h1>
-          </div>  
+            <h1><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Utenti</h1>
+          </div>
+           
         </div>
       </div>
-    </header>
+    </header> 
 
     
 
     <section id="main">
       <div class="container">
         <div class="row">
+          <!--PANNELLO LATERALE-->
           <div class="col-md-3">
             <div class="list-group">
-              <a href="index.php" class="list-group-item active main-color-bg">
+              <a href="../index.php" class="list-group-item active main-color-bg">
                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Dashboard
               </a>
               <a href="utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti </a>
-              <a href="card.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Card </a>
+              <a href="../corsi/corsi.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Corsi <span class="badge"></span></a>
             </div>
-
           </div>
+          <!--PANNELLO CENTRALE-->
           <div class="col-md-9">
             <!-- Website Overview -->
             <div class="panel panel-default">
               <div class="panel-heading main-color-bg">
-                <h3 class="panel-title">Card</h3>
+                <h3 class="panel-title"><?php echo $nome." ".$cognome ?></h3>
               </div>
+              <div class="panel-body">
 
-              <!-- PANNELLO ESTERNO -->
-              <div class="panel-body"> 
-
-                <!-- MENU CARD -->
                 <div class="row">
-                  <div class="col-md-2">
-                    <a type="button" class="btn btn-info" href="card.php">Aggiungi Card</a>
-                  </div>
-                  <div class="col-md-2">
-                    <a type="button" class="btn btn-info" href="modifica_card.php">Modifica Card</a>
-                  </div>
-                  <div class="col-md-2">
-                    <a type="button" class="btn btn-info" href="ricerca_card.php">Ricerca Card</a>
-                  </div>
-                  <div class="col-md-2">
-                    <a type="button" class="btn btn-info" href="disattiva_card.php">Disattiva Card</a>
-                  </div>
-                </div>
-
-                <br>
-
-                <div class="panel-heading main-color-bg">
-                  <h3 class="panel-title">Modifica Card</h3>
-                </div>
-
-                <!-- PANNELLO INTERNO AGGIUNGI CARD -->
-                <div class="panel-body"> 
-                  <form action="modifica_card.php" method="post">
-                    <div class="form-group">
-                      <div class="row">
-                        <div class= <?php echo('"'.$alert.'"') ?> >
-                          <?php echo $messaggio; ?>
-                        </div>
+                  <div class="col-md-12">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <a href="utenti.php">Utenti</a> / <a href="profilo.php?id=<?php echo $id?>"><?php echo $nome." ".$cognome ?></a> / <a href="card.php?id=<?php echo $id?>">Card</a> / <a href="#">Aggiungi Card</a>
                       </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class= <?php echo('"'.$alert.'"') ?> >
+                      <?php echo $messaggio; ?>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <form action="add_card.php" method="post">
                       <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-md-4">
                           <label>Card</label>
                           <div id="content"></div>
+                        </div>
+                        <div class="col-md-4">
+                          <label>Tipo</label>
+                          <input class="form-control" type="text" name="tipo">
                         </div>
                         <div class="col-md-4">
                           <label>Nr entrate</label>
@@ -182,35 +179,29 @@ if(isset($_POST['modifica_card'])){
                             <option value="20">+20</option>
                             <option value="50">+50</option>
                           </select>
+                        </div>
+                        
+                        <div class="col-md-8">
+                          <br>
+                          <button type="submit" class="btn btn-info" name="add_card">Aggiungi Card</button>
                         </div> 
+                        
                       </div>
-                      <br>
-                      <button type="submit" class="btn btn-success" name="modifica_card">Modifica Card</button>
-                    </div>
-                  </form>
-                </div>  
+                    </form>
+                  </div>
+                </div>
+                
               </div>
-
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    
-
-    <!-- Modals -->
-
-   
-
-  <script>
-     CKEDITOR.replace( 'editor1' );
- </script>
-
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
   </body>
 </html>

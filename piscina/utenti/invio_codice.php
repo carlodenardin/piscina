@@ -1,6 +1,6 @@
 <?php
 
-include 'config/config.php';
+include '../config/config.php';
     
 if ($result = mysqli_query($connessione, "SELECT codice FROM dati")) {
 

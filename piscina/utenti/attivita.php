@@ -1,9 +1,9 @@
 <?php
 session_start();
-include 'config/config.php';
+include '../config/config.php';
 
 if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
-  header("Refresh:0; url=logout.php");
+  header("Refresh:0; url=../logout.php");
 }
 
 $alert = "";
@@ -43,8 +43,8 @@ while($obj = $risultato2->fetch_object()){
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Area | Pages</title>
     <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/style.css" rel="stylesheet">
     <script src="http://cdn.ckeditor.com/4.6.1/standard/ckeditor.js"></script>
 
     <script>
@@ -84,7 +84,7 @@ while($obj = $risultato2->fetch_object()){
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#">Welcome, admin</a></li>
-            <li><a href="logout.php">Logout</a></li>
+            <li><a href="../logout.php">Logout</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -108,10 +108,11 @@ while($obj = $risultato2->fetch_object()){
         <div class="row">
           <div class="col-md-3">
             <div class="list-group">
-              <a href="index.php" class="list-group-item active main-color-bg">
+              <a href="../index.php" class="list-group-item active main-color-bg">
                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Dashboard
               </a>
               <a href="utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti </a>
+              <a href="../corsi/corsi.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Corsi <span class="badge"></span></a>
             </div>
 
           </div>
@@ -155,8 +156,8 @@ while($obj = $risultato2->fetch_object()){
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script href="js/jquery-1.8.3.min"></script>
+    <script src="../bootstrapjs/bootstrap.min.js"></script>
+    <script href="../bootstrap/js/jquery-1.8.3.min"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
   </body>
 </html>
