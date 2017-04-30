@@ -6,6 +6,54 @@ if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
   header("Refresh:0; url=../logout.php");
 }
 
+$nome = $_POST['nome'];
+$turni = $_POST['turni'];
+$orari = $_POST['orari'];
+$stampaTurni='';
+$stampaOrari='';
+for($i=1;$i<=$turni;$i++){
+  $stampaTurni.='<div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h3 class="panel-title"><strong><font color="red">Turno '.$i.':</font></strong></h3>
+                    </div>
+                    <div class="panel-body">
+
+                      <div class="row">                     
+                        <div class="col-md-3">
+                          <label>Dal</label>
+                          <div class="form-group">
+                            <input type="date" name="" class="form-control">
+                          </div>
+                        </div>
+                        <div class="col-md-3">
+                          <label>Al</label>
+                          <div class="form-group">
+                            <input type="date" name="" class="form-control">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>';
+}
+
+for($i=1;$i<=$orari;$i++){
+  $stampaOrari.='<div class="row">
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="time" name="" class="form-control">
+                      </div>
+                    </div>
+                    <div class="col-md-3"> 
+                      <div class="form-group">
+                        <input type="time" name="" class="form-control">
+                      </div>
+                    </div>
+                  </div>';
+}
+
+
+
+
 
 ?>
 <!DOCTYPE html>
@@ -22,25 +70,6 @@ if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
     <script href="../bootstrap/js/jquery-1.8.3.min"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     <script>
-
-      // FUNZIONE PER FILTRARE COGNOMI
-      function myFunction() { 
-        var input, filter, table, tr, td, i;input = document.getElementById("myInput");
-        filter = input.value.toUpperCase();
-        table = document.getElementById("myTable");
-        tr = table.getElementsByTagName("tr");
-
-        for (i = 0; i < tr.length; i++) {
-          td = tr[i].getElementsByTagName("td")[0];
-          if (td) {
-            if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
-              tr[i].style.display = "";
-            } else {
-              tr[i].style.display = "none";
-            }
-          } 
-        }
-      }
    
     </script>
   </head>
@@ -88,6 +117,7 @@ if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
               </a>
               <a href="../utenti/utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti </a>
               <a href="corsi.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Corsi <span class="badge"></span></a>
+              <!-- Include the plugin's CSS and JS: -->
             </div>
 
           </div>
@@ -95,64 +125,42 @@ if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
             <!-- Website Overview -->
             <div class="panel panel-default">
               <div class="panel-heading main-color-bg">
-                <h3 class="panel-title">Corsi</h3>
+                <h3 class="panel-title">Aggiungi Corso: <strong><?php echo $nome ?></strong></h3>
               </div>
               <div class="panel-body">
-                <form action="add_corso.php" method="post">
+                
+                <form>
+                  <div class="form-group">  
+                    <label>Seleziona Giorni:</label>
+                  </div>
+                  <div class="form-group">  
+                    <label class="checkbox-inline"><input type="checkbox" value="lunedi" name="giorno1">Lunedì</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="martedi" name="giorno2">Martedì</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="mercoledi" name="giorno3">Mercoledì</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="giovedi" name="giorno4">Giovedì</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="venerdi" name="giorno5">Venerdì</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="sabato" name="giorno6">Sabato</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="domenica" name="giorno7">Domenica</label>
+                  </div>
+                  
                   <div class="panel panel-default">
-                    <div class="panel-body" style="height:62px">
-                      <div class="form-inline"> 
-
-                          <div class="form-group">
-                            <label>Nome:</label>
-                            <input type="text" name="nome" class="form-control">
-                          </div>
-
-                          <div class="form-group">
-                            <label>Turni:</label>
-                            <select class="form-control" name="turni">
-                              <option disabled>-</option>
-                              <option value="1">1</option>
-                              <option value="2">2</option>
-                              <option value="3">3</option>
-                              <option value="4">4</option>
-                              <option value="5">5</option>
-                              <option value="6">6</option>
-                            </select>
-                          </div>
-                        
-                        
-                          <div class="form-group">
-                            <label>Orari:</label>
-                            <select class="form-control" name="orari">
-                              <option disabled>-</option>
-                              <option value="1">1</option>
-                              <option value="2">2</option>
-                              <option value="3">3</option>
-                              <option value="4">4</option>
-                              <option value="5">5</option>
-                              <option value="6">6</option>
-                            </select>
-                          </div>
-
-                          <div class="form-group">
-                            <button type="submit" class="btn btn-info">Aggiungi Corso</button>
-                          </div>
-
-                      </div>
+                    <div class="panel-heading">
+                    <h3 class="panel-title"><strong>Inserisci Orari:</strong></h3>
+                    </div>
+                    <div class="panel-body">
+                      <?php echo $stampaOrari; ?>
                     </div>
                   </div>
-                </form>
-                
-                <div class="panel panel-default">
-                  <div class="panel-heading main-color-bg">
-                    <h3 class="panel-title"></h3>
-                  </div>
-                  <div class="panel-body">
-                    
-                  </div>
-                </div>
+                  
+                  <?php echo $stampaTurni; ?>
 
+                  <div class="form-group">
+                    <button type="submit" class="btn btn-success">Aggiungi corso</button>
+                  </div> 
+                </form>
+
+                
+              
               </div>
             </div>
           </div>
