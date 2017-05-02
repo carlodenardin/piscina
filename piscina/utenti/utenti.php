@@ -1,4 +1,4 @@
-<?php
+  <?php
 session_start();
 include '../config/config.php';
 
@@ -29,6 +29,7 @@ if(isset($_POST['aggiungi_utente'])){
 
 //stampa
 $sql = "SELECT * FROM bagnanti ORDER BY cognome"; //VERIFICATA
+if($connessione->query($sql)){
 $var = $connessione->query($sql);
 $result="";
 while($obj = $var->fetch_object()){
@@ -41,17 +42,22 @@ while($obj = $var->fetch_object()){
   $result.="<td>".$data."</td>";
 
   $sql = "SELECT * FROM card WHERE fk_bagnante='".$obj->id_bagnante."'";
-  $risultato = $connessione->query($sql);
-  $row = mysqli_num_rows($risultato);
+  if($connessione->query($sql)){
+    $risultato = $connessione->query($sql);
+    $row = mysqli_num_rows($risultato);
 
-  if($row!=0){
-    $result.="<td><button type='button' class='btn btn-success'>ATTIVA</button></td>";
+    if($row!=0){
+      $result.="<td><button type='button' class='btn btn-success'>ATTIVA</button></td>";
+    }
+    else{
+      $result.="<td><button type='button' class='btn btn-danger'>NON ATTIVA</button></td>";
+    }
   }
   else{
-    $result.="<td><button type='button' class='btn btn-danger'>NON ATTIVA</button></td>";;
+    $result.="<td><button type='button' class='btn btn-danger'>NON ATTIVA</button></td>";
   }
   $result.="<td><button type='sumbit' class='btn btn-info' value='".$obj->id_bagnante."' name='id' >PROFILO</button></td></tr></form>";
-}
+}}
 
 
 ?>

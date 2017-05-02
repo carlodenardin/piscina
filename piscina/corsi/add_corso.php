@@ -9,6 +9,11 @@ if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
 $nome = $_POST['nome'];
 $turni = $_POST['turni'];
 $orari = $_POST['orari'];
+
+$_SESSION['nome']=$nome;
+$_SESSION['turni']=$turni;
+$_SESSION['orari']=$orari;
+
 $stampaTurni='';
 $stampaOrari='';
 for($i=1;$i<=$turni;$i++){
@@ -22,13 +27,19 @@ for($i=1;$i<=$turni;$i++){
                         <div class="col-md-3">
                           <label>Dal</label>
                           <div class="form-group">
-                            <input type="date" name="" class="form-control">
+                            <input type="date" name="turno'.$i.'i" class="form-control">
                           </div>
                         </div>
                         <div class="col-md-3">
                           <label>Al</label>
                           <div class="form-group">
-                            <input type="date" name="" class="form-control">
+                            <input type="date" name="turno'.$i.'f" class="form-control">
+                          </div>
+                        </div>
+                        <div class="col-md-2">
+                          <label>N° Lezioni</label>
+                          <div class="form-group">
+                            <input type="number" name="lezioni'.$i.'" class="form-control">
                           </div>
                         </div>
                       </div>
@@ -40,16 +51,18 @@ for($i=1;$i<=$orari;$i++){
   $stampaOrari.='<div class="row">
                     <div class="col-md-3">
                       <div class="form-group">
-                        <input type="time" name="" class="form-control">
+                        <input type="time" name="orario'.$i.'i" class="form-control">
                       </div>
                     </div>
                     <div class="col-md-3"> 
                       <div class="form-group">
-                        <input type="time" name="" class="form-control">
+                        <input type="time" name="orario'.$i.'f" class="form-control">
                       </div>
                     </div>
                   </div>';
 }
+
+
 
 
 
@@ -129,18 +142,18 @@ for($i=1;$i<=$orari;$i++){
               </div>
               <div class="panel-body">
                 
-                <form>
+                <form action="corsi.php" method="post">
                   <div class="form-group">  
                     <label>Seleziona Giorni:</label>
                   </div>
                   <div class="form-group">  
-                    <label class="checkbox-inline"><input type="checkbox" value="lunedi" name="giorno1">Lunedì</label>
-                    <label class="checkbox-inline"><input type="checkbox" value="martedi" name="giorno2">Martedì</label>
-                    <label class="checkbox-inline"><input type="checkbox" value="mercoledi" name="giorno3">Mercoledì</label>
-                    <label class="checkbox-inline"><input type="checkbox" value="giovedi" name="giorno4">Giovedì</label>
-                    <label class="checkbox-inline"><input type="checkbox" value="venerdi" name="giorno5">Venerdì</label>
-                    <label class="checkbox-inline"><input type="checkbox" value="sabato" name="giorno6">Sabato</label>
-                    <label class="checkbox-inline"><input type="checkbox" value="domenica" name="giorno7">Domenica</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="1" name="giorno1">Lunedì</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="2" name="giorno2">Martedì</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="3" name="giorno3">Mercoledì</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="4" name="giorno4">Giovedì</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="5" name="giorno5">Venerdì</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="6" name="giorno6">Sabato</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="7" name="giorno7">Domenica</label>
                   </div>
                   
                   <div class="panel panel-default">
@@ -155,7 +168,7 @@ for($i=1;$i<=$orari;$i++){
                   <?php echo $stampaTurni; ?>
 
                   <div class="form-group">
-                    <button type="submit" class="btn btn-success">Aggiungi corso</button>
+                    <button type="submit" class="btn btn-success" name="aggiungi_corso">Aggiungi corso</button>
                   </div> 
                 </form>
 

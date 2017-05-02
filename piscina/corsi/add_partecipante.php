@@ -15,36 +15,17 @@ if ($result = mysqli_query($connessione, "SELECT codice FROM dati")) {
     }
 }
 
-$alert = "";
-$messaggio = "";
-$disabled = "";
-$title = "";
-$card = "";
+$id_turno = $_SESSION['turno'];
 
-//ricevo il valore da profilo.php
-$id = $_SESSION['id_passato'];
-
-$sql = "SELECT * FROM bagnanti WHERE id_bagnante='$id'";//VERIFICATA
+$sql = "SELECT fk_corso FROM turni WHERE id_turno='$id_turno'";
 $risultato = $connessione->query($sql);
 $row = $risultato->fetch_array();
+$id_corso = $row[0];
 
-$nome = $row['nome'];
-$cognome = $row['cognome'];
-
-$sql2 = "SELECT * FROM card WHERE fk_bagnante='$id'";
-if($connessione->query($sql2)){
-  $risultato2=$connessione->query($sql2);
-  $row2 = $risultato2->fetch_array();
-  $card = $row2['id_card'];
-  if($card!=""){
-  $disabled = "disabled";
-  $title = "Carta già associata";
-}
-}
-
-
-
-
+$sql = "SELECT * FROM corsi WHERE id_corso='$id_corso'";
+$risultato = $connessione->query($sql);
+$row = $risultato->fetch_array();
+$nome = $row[1];
 
 
 
@@ -60,9 +41,33 @@ if($connessione->query($sql2)){
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="../bootstrap/css/style.css" rel="stylesheet">
     <script src="http://cdn.ckeditor.com/4.6.1/standard/ckeditor.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+    <script href="../bootstrap/js/jquery-1.8.3.min"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
 
-    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script>
+      //OTTIENI CODICE DA DATABASE
+      (function($)
+      {
+          $(document).ready(function()
+          {
+              $.ajaxSetup(
+              {
+                  cache: false,
+                  beforeSend: function() {
+                      $('#content').hide();
+                      $('#content').show();
+                  }
+                  
+              });
+              var $container = $("#content");
+              $container.load("../utenti/ottieni_codice.php");
+              var refreshId = setInterval(function()
+              {
+                  $container.load('../utenti/ottieni_codice.php');
+              },2000);
+          });
+      })(jQuery);
+    </script>
 
   </head>
   <body>
@@ -91,7 +96,7 @@ if($connessione->query($sql2)){
       <div class="container">
         <div class="row">
           <div class="col-md-10">
-            <h1><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Utenti</h1>
+            <h1><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Corsi</h1>
           </div>
            
         </div>
@@ -109,8 +114,8 @@ if($connessione->query($sql2)){
               <a href="../index.php" class="list-group-item active main-color-bg">
                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Dashboard
               </a>
-              <a href="utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti </a>
-              <a href="../corsi/corsi.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Corsi <span class="badge"></span></a>
+              <a href="../utenti/utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti </a>
+              <a href="corsi.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Corsi <span class="badge"></span></a>
             </div>
           </div>
           <!--PANNELLO CENTRALE-->
@@ -118,7 +123,7 @@ if($connessione->query($sql2)){
             <!-- Website Overview -->
             <div class="panel panel-default">
               <div class="panel-heading main-color-bg">
-                <h3 class="panel-title"><?php echo $nome." ".$cognome ?></h3>
+                <h3 class="panel-title">Aggiungi Tessera</h3>
               </div>
               <div class="panel-body">
 
@@ -126,33 +131,29 @@ if($connessione->query($sql2)){
                   <div class="col-md-12">
                     <div class="panel panel-default">
                       <div class="panel-body">
-                        <a href="utenti.php">Utenti</a> / <a href="profilo.php?id=<?php echo $id?>"><?php echo $nome." ".$cognome ?></a> / <a href="#">Card</a>
+                        <a href="utenti.php">Corsi</a> / <a href="manage_corso.php?id=<?php echo $id_turno;?>&nome=<?php echo $nome?>"><?php echo $nome; ?></a> / <a href="#">Aggiungi Partecipante</a>
                       </div>
                     </div>
+                  </div>
+                </div>
+              
+                <div class="row">
+                  <div class="col-md-12">
+                    <form action="conferma.php" method="post">
+                      <div class="row">
+                        <div class="col-md-4">
+                          <label>Card</label>
+                          <div id="content"></div>
+                        </div>
+                        <div class="col-md-8">
+                          <br>
+                          <button type="submit" class="btn btn-info" name="add_partecipante">Conferma</button>
+                        </div> 
+                      </div>
+                    </form>
                   </div>
                 </div>
                 
-                <div class="col-md-8">
-                  <form class="form-horizontal" method="post" action="profilo.php">
-                    <input type="hidden" value="<?php echo $id;?>" name="id">
-                    <div class="form-group">
-                      <label class="col-lg-3 control-label">Card:</label>
-                      <div class="col-lg-8">
-                        <input class="form-control" value="<?php echo $card;?>" type="text" name="card" disabled>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-
-                <div class="col-md-4">
-                  <div class="col-md-12">
-                    <ul class="list-group">
-                      <li class="list-group-item"><a data-toggle="tooltip" href="add_card.php" title="<?php echo $title?>"><button style="width: 100%;" type="button" class="btn btn-info" <?php echo $disabled?>>Aggiungi Card</button></a></li>
-                      <li class="list-group-item"><a href="remove_card.php"><button style="width: 100%;" type="button" class="btn btn-info">Disattiva Card</button></a></li>
-                      
-                    </ul>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -165,7 +166,5 @@ if($connessione->query($sql2)){
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="../bootstrap/js/bootstrap.min.js"></script>
-    <script href="../bootstrap/js/jquery-1.8.3.min"></script>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
   </body>
 </html>

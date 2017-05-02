@@ -6,46 +6,24 @@ if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
   header("Refresh:0; url=../logout.php");
 }
 
-if ($result = mysqli_query($connessione, "SELECT codice FROM dati")) {
-    /* determine number of rows result set */
-    $row = mysqli_num_rows($result);
-    if($row!=0){
-      $sql = "DELETE FROM dati";
-      $connessione->query($sql);
-    }
+$id_turno = $_GET['id'];
+$_SESSION['turno']=$id_turno;
+$nome = $_GET['nome'];
+$_SESSION['nome']=$nome;
+$stampa="";
+
+$sql = "SELECT * FROM iscrizioni JOIN card ON id_card=fk_card JOIN bagnanti ON fk_bagnante=id_bagnante WHERE fk_turno='$id_turno'";
+if($connessione->query($sql)){
+  $risultato = $connessione->query($sql);
+
+  while($obj = $risultato->fetch_object()){
+    $stampa.="<tr><td>".$obj->cognome."</td>";
+    $stampa.="<td>".$obj->nome."</td>";
+    $stampa.="<td><button type='button' class='btn btn-info'>Profilo</button></td>";
+    $stampa.="<td><button type='button' class='btn btn-danger'>Elimina</button></td></tr>";
+
+  }
 }
-
-$alert = "";
-$messaggio = "";
-$disabled = "";
-$title = "";
-$card = "";
-
-//ricevo il valore da profilo.php
-$id = $_SESSION['id_passato'];
-
-$sql = "SELECT * FROM bagnanti WHERE id_bagnante='$id'";//VERIFICATA
-$risultato = $connessione->query($sql);
-$row = $risultato->fetch_array();
-
-$nome = $row['nome'];
-$cognome = $row['cognome'];
-
-$sql2 = "SELECT * FROM card WHERE fk_bagnante='$id'";
-if($connessione->query($sql2)){
-  $risultato2=$connessione->query($sql2);
-  $row2 = $risultato2->fetch_array();
-  $card = $row2['id_card'];
-  if($card!=""){
-  $disabled = "disabled";
-  $title = "Carta già associata";
-}
-}
-
-
-
-
-
 
 
 ?>
@@ -109,8 +87,8 @@ if($connessione->query($sql2)){
               <a href="../index.php" class="list-group-item active main-color-bg">
                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Dashboard
               </a>
-              <a href="utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti </a>
-              <a href="../corsi/corsi.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Corsi <span class="badge"></span></a>
+              <a href="../utenti/utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti </a>
+              <a href="corsi.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Corsi <span class="badge"></span></a>
             </div>
           </div>
           <!--PANNELLO CENTRALE-->
@@ -118,7 +96,7 @@ if($connessione->query($sql2)){
             <!-- Website Overview -->
             <div class="panel panel-default">
               <div class="panel-heading main-color-bg">
-                <h3 class="panel-title"><?php echo $nome." ".$cognome ?></h3>
+                <h3 class="panel-title"><?php echo $nome ?></h3>
               </div>
               <div class="panel-body">
 
@@ -126,33 +104,39 @@ if($connessione->query($sql2)){
                   <div class="col-md-12">
                     <div class="panel panel-default">
                       <div class="panel-body">
-                        <a href="utenti.php">Utenti</a> / <a href="profilo.php?id=<?php echo $id?>"><?php echo $nome." ".$cognome ?></a> / <a href="#">Card</a>
+                        <a href="corsi.php">corsi</a> / <a href="#"><?php echo $nome; ?></a>
                       </div>
                     </div>
                   </div>
                 </div>
-                
+
                 <div class="col-md-8">
-                  <form class="form-horizontal" method="post" action="profilo.php">
-                    <input type="hidden" value="<?php echo $id;?>" name="id">
-                    <div class="form-group">
-                      <label class="col-lg-3 control-label">Card:</label>
-                      <div class="col-lg-8">
-                        <input class="form-control" value="<?php echo $card;?>" type="text" name="card" disabled>
-                      </div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading main-color-bg">
+                      <h3 class="panel-title">Partecipanti</h3>
                     </div>
-                  </form>
+                    <div class="panel-body">
+                      <table class="table table-striped">
+                        <tr>
+                          <th>Cognome</th>
+                          <th>Nome</th>
+                          <th>Profilo</th>
+                          <th>Cancella</th>
+                        </tr>
+                        <?php echo $stampa; ?>
+                      </table>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="col-md-4">
                   <div class="col-md-12">
                     <ul class="list-group">
-                      <li class="list-group-item"><a data-toggle="tooltip" href="add_card.php" title="<?php echo $title?>"><button style="width: 100%;" type="button" class="btn btn-info" <?php echo $disabled?>>Aggiungi Card</button></a></li>
-                      <li class="list-group-item"><a href="remove_card.php"><button style="width: 100%;" type="button" class="btn btn-info">Disattiva Card</button></a></li>
-                      
+                      <li class="list-group-item"><a data-toggle="tooltip" href="add_partecipante.php"><button style="width: 100%;" type="button" class="btn btn-info">Aggiungi Partecipante</button></a></li>
                     </ul>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>

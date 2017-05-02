@@ -6,6 +6,88 @@ if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
   header("Refresh:0; url=../logout.php");
 }
 
+$stampa="";
+$stampa2="";
+
+if(isset($_POST['aggiungi_corso'])){
+  $nome = $_SESSION['nome'];
+  $turni = $_SESSION['turni'];
+  $orari = $_SESSION['orari'];
+
+  $giorni = array();
+  $turniI = array();
+  $turniF = array();
+  $lezioni = array();
+  $orariI = array();
+  $orariF = array();
+
+  $sql = "INSERT INTO corsi (nome) VALUES ('$nome')";
+  $connessione->query($sql);
+
+  for($i=1;$i<=7;$i++){
+    if(isset($_POST['giorno'.$i])){
+      $giorni[$i] = $_POST['giorno'.$i];
+      $sql = "SELECT id_corso FROM corsi WHERE nome='$nome'";
+      $risultato = $connessione->query($sql);
+      $row = $risultato->fetch_array();
+      $sql = "INSERT INTO rel_giorni_corsi (fk_giorno,fk_corso) VALUES ('".$_POST['giorno'.$i]."','".$row[0]."')";
+      $connessione->query($sql);
+    }
+  }
+
+  for($i=1;$i<=$turni;$i++){
+    if(isset($_POST['turno'.$i.'i'])&&isset($_POST['turno'.$i.'f'])&&isset($_POST['lezioni'.$i])){
+      $turniI[$i] = $_POST['turno'.$i.'i'];
+      $turniF[$i] = $_POST['turno'.$i.'f'];
+      $lezioni[$i] = $_POST['lezioni'.$i];
+      $sql = "SELECT id_corso FROM corsi WHERE nome='$nome'";
+      $risultato = $connessione->query($sql);
+      $row = $risultato->fetch_array();
+      $sql = "INSERT INTO turni (dal,al,lezioni,fk_corso) VALUES ('$turniI[$i]','$turniF[$i]','$lezioni[$i]','$row[0]')";
+      $connessione->query($sql);
+    }
+  }
+
+  for($i=1;$i<=$orari;$i++){
+    if(isset($_POST['orario'.$i.'i'])&&isset($_POST['orario'.$i.'f'])){
+      $orariI[$i] = $_POST['orario'.$i.'i'];
+      $orariF[$i] = $_POST['orario'.$i.'f'];
+      $sql = "SELECT id_corso FROM corsi WHERE nome='$nome'";
+      $risultato = $connessione->query($sql);
+      $row = $risultato->fetch_array();
+      $sql = "INSERT INTO orari (dalle,alle,fk_corso) VALUES ('$orariI[$i]','$orariF[$i]','$row[0]')";
+      $connessione->query($sql);
+    }
+  }
+
+  
+}
+
+$sql = "SELECT * FROM corsi";
+$risultato = $connessione->query($sql);
+$i=1;
+
+while($obj = $risultato->fetch_object()){
+  $stampa.='<div class="panel panel-default"><div class="panel-heading main-color-bg"><h3 class="panel-title">'.$obj->nome.'</h3></div><div class="panel-body"><table class="table table-striped"><tr><th>Turno</th><th>Dal</th><th>Al</th><th>Lezioni</th><th>Gestione</th></tr>';
+
+  $sql2 = "SELECT * FROM turni WHERE fk_corso='".$obj->id_corso."'";
+  $risultato2 = $connessione->query($sql2);
+  while($obj2 = $risultato2->fetch_object()){
+    $datai = $obj2->dal;
+    $datai = explode("-",$datai);
+    $datai = $datai[2]."/".$datai[1]."/".$datai[0];
+    $dataf = $obj2->al;
+    $dataf = explode("-",$dataf);
+    $dataf = $dataf[2]."/".$dataf[1]."/".$dataf[0];
+    $stampa2.= '<tr><td>Turno '.$i.'</td><td>'.$datai.'</td><td>'.$dataf.'</td><td>'.$obj2->lezioni.'</td><td><a href="manage_corso.php?nome='.$obj->nome.'&id='.$obj2->id_turno.'"><button type="button" class="btn btn-info">Gestisci</button></a></td></tr>';
+    $i++;
+  }
+  $stampa.=$stampa2;
+
+  $stampa.='</table></div></div>';
+  $stampa2="";
+  $i=1;
+}
 
 ?>
 <!DOCTYPE html>
@@ -144,14 +226,7 @@ if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
                   </div>
                 </form>
                 
-                <div class="panel panel-default">
-                  <div class="panel-heading main-color-bg">
-                    <h3 class="panel-title"></h3>
-                  </div>
-                  <div class="panel-body">
-                    
-                  </div>
-                </div>
+                <?php echo $stampa; ?>
 
               </div>
             </div>

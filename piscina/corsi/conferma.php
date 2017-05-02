@@ -8,41 +8,70 @@ if($_SESSION['username']!=$u||$_SESSION['password']!=$p){
 
 $alert = "";
 $messaggio = "";
-$card = "";
-//ricevo il valore da profilo.php
-$id = $_SESSION['id_passato'];
-
-//ricevo il valore da ottieni_codice.php
+$stampa = "";
+$id_turno = $_SESSION['turno'];
+$nome = $_SESSION['nome'];
 
 
-$sql = "SELECT * FROM bagnanti WHERE id_bagnante='$id'";//VERIFICATA
-$risultato = $connessione->query($sql);
-$row = $risultato->fetch_array();
-
-$nome = $row['nome'];
-$cognome = $row['cognome'];
-
-if ($result = mysqli_query($connessione, "SELECT codice FROM dati")) {
-    /* determine number of rows result set */
-    $row = mysqli_num_rows($result);
-    if($row!=0){
-      $sql = "DELETE FROM dati";
-      $connessione->query($sql);
-    }
-}
-
-if(isset($_POST['add_card'])){
+if(isset($_POST['add_partecipante'])){
   $card = $_SESSION['card'];
-  $sql = "INSERT INTO card (id_card,fk_bagnante) VALUES ('$card','$id')"; //VERIFICATA
-  if($connessione->query($sql)){
-    $alert = "alert alert-success";
-    $messaggio = "Carta configurata";
-    header("Refresh:1; url=card.php");
+  $sql = "SELECT * FROM card WHERE id_card='$card'";
+  $risultato = $connessione->query($sql);
+  $row = $risultato->fetch_array();
+  $numrow = mysqli_num_rows($risultato);
+  if($numrow!=1){
+    $messaggio = "Errore! Nessun utente collegato a questa carta";
+    $alert = "alert alert-danger";
+    header("Refresh:1; url=manage_corso.php?id=1&nome=adulti(lunedi-giovedi)");
   }
   else{
-    $alert = "alert alert-danger";
-    $messaggio = "Carta <strong>NON</strong> configurata";
+    $sql = "SELECT nome,cognome FROM bagnanti WHERE id_bagnante='$row[1]'";
+    $risultato = $connessione->query($sql);
+    $row = $risultato->fetch_array();
+    $nome = $row[0];
+    $cognome = $row[1];
+    $stampa='<div class="row">
+                  <div class="col-md-1"></div>
+                  <div class="col-md-10">
+                    <div class="panel panel-default">
+                      <div class="panel-body"><center>Sicuro di aggiungere <strong>'.$nome.' '.$cognome.' </strong>al corso? </center>
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                      <form action="conferma.php" method="post"><button style="width: 100%;" type="submit" class="btn btn-success" name="aggiunto">SI</button></form>
+                    </div>
+                    <div class="col-md-6">
+                      <a href="manage_corso.php?id=<?php echo $id_turno;?>&nome=<?php echo $nome?>"><button style="width: 100%;" type="button" value="no" class="btn btn-danger" name="bottone">NO</button></a>
+                    </div>
+                  </div>
+                  <div class="col-md-1"></div>
+                </div> ';
   }
+}
+
+if(isset($_POST['aggiunto'])){
+  $card = $_SESSION['card'];
+  $id_turno = $_SESSION['turno'];
+
+  $sql = "SELECT * FROM iscrizioni WHERE fk_card='$card'";
+  $risultato = $connessione->query($sql);
+  $numrow = mysqli_num_rows($risultato);
+  if($numrow!=0){
+    $messaggio = "Il bagnante è già iscritto a questo corso!";
+    $alert = "alert alert-danger";
+    header("Refresh:1; url=manage_corso.php?id=$id_turno&nome=$nome");
+  }
+  else{
+    $sql = "INSERT INTO iscrizioni (fk_card,fk_turno) VALUES ('$card','$id_turno')";
+    $connessione->query($sql);
+
+    $messaggio = "Bagnante aggiunto con successo al Corso!";
+    $alert = "alert alert-success";
+    header("Refresh:1; url=manage_corso.php?id=$id_turno&nome=$nome");
+  }
+  
+
 }
 
 ?>
@@ -61,28 +90,7 @@ if(isset($_POST['add_card'])){
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
 
     <script>
-      //OTTIENI CODICE DA DATABASE
-      (function($)
-      {
-          $(document).ready(function()
-          {
-              $.ajaxSetup(
-              {
-                  cache: false,
-                  beforeSend: function() {
-                      $('#content').hide();
-                      $('#content').show();
-                  }
-                  
-              });
-              var $container = $("#content");
-              $container.load("ottieni_codice.php");
-              var refreshId = setInterval(function()
-              {
-                  $container.load('ottieni_codice.php');
-              },2000);
-          });
-      })(jQuery);
+      
     </script>
 
   </head>
@@ -130,8 +138,8 @@ if(isset($_POST['add_card'])){
               <a href="../index.php" class="list-group-item active main-color-bg">
                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Dashboard
               </a>
-              <a href="utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti </a>
-              <a href="../corsi/corsi.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Corsi <span class="badge"></span></a>
+              <a href="../utenti/utenti.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Utenti </a>
+              <a href="corsi.php" class="list-group-item"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Corsi <span class="badge"></span></a>
             </div>
           </div>
           <!--PANNELLO CENTRALE-->
@@ -139,43 +147,15 @@ if(isset($_POST['add_card'])){
             <!-- Website Overview -->
             <div class="panel panel-default">
               <div class="panel-heading main-color-bg">
-                <h3 class="panel-title"><?php echo $nome." ".$cognome ?></h3>
+                <h3 class="panel-title">Conferma</h3>
               </div>
               <div class="panel-body">
-
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="panel panel-default">
-                      <div class="panel-body">
-                        <a href="utenti.php">Utenti</a> / <a href="profilo.php?id=<?php echo $id?>"><?php echo $nome." ".$cognome ?></a> / <a href="card.php?id=<?php echo $id?>">Card</a> / <a href="#">Aggiungi Card</a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 <div class="row">
                   <div class= <?php echo('"'.$alert.'"') ?> >
                       <?php echo $messaggio; ?>
                   </div>
                 </div>
-                <div class="row">
-                  <div class="col-md-12">
-                    <form action="add_card.php" method="post">
-                      <div class="row">
-                        <div class="col-md-4">
-                          <label>Card</label>
-                          <div id="content"></div>
-                        </div>
-                        
-                        <div class="col-md-8">
-                          <br>
-                          <button type="submit" class="btn btn-info" name="add_card">Aggiungi Card</button>
-                        </div> 
-                        
-                      </div>
-                    </form>
-                  </div>
-                </div>
-                
+                <?php echo $stampa; ?>    
               </div>
             </div>
           </div>
